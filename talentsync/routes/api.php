@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\AuthController as V1AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,3 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('jwt.auth')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::prefix('v1')->group(function () {
+    Route::group(['prefix' => '/auth', 'as' => 'auth.'], function () {
+        Route::post('register', [V1AuthController::class, 'register']);
+        Route::post('login', [V1AuthController::class, 'login']);
+    });
+});
+
