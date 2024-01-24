@@ -10,14 +10,7 @@ use App\Traits\HasJsonResponse;
 class BlogController extends Controller
 {
     use HasJsonResponse;
-    protected $user;
-
-    public function __construct()
-    {
-        //$this->user = JWTAuth::parseToken()->authenticate();
-        //  $this->middleware('jwt.auth', ['except' => ['index']]);
-    }
-
+    
     public function index()
     {
        $blogs = Blog::all();
