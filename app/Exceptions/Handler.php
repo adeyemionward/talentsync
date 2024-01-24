@@ -61,21 +61,7 @@ class Handler extends ExceptionHandler
 
 
 
-        if ($exception instanceof \BadMethodCallException) {
-            return response()->json( [
-                'success' => 0,
-                'message' => 'Bad Method Called',
-                'status' => '404',
-            ], 404 );
-        }
-
-        if ($exception instanceof \AuthenticationException) {
-            return response()->json( [
-                'success' => 0,
-                'message' => 'Bad Method Called',
-                'status' => '404',
-            ], 404 );
-        }
+      
 
         if ($exception instanceof TokenExpiredException) {
             return response()->json( [

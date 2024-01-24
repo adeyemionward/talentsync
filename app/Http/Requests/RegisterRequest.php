@@ -9,7 +9,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use App\Traits\HasJsonResponse;
 
-class RegisterRequest extends FormRequest
+class RegisterRequest extends FormRequest 
 {
     use HasJsonResponse;
     /**

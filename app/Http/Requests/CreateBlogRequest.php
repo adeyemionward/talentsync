@@ -9,12 +9,13 @@ use Illuminate\Http\JsonResponse;
 use App\Traits\HasJsonResponse;
 class CreateBlogRequest extends FormRequest
 {
+    use HasJsonResponse;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -27,7 +28,6 @@ class CreateBlogRequest extends FormRequest
         return [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'author' => 'required|string|max:255',
         ];
     }
 
@@ -36,7 +36,6 @@ class CreateBlogRequest extends FormRequest
         return [
             'title.required' => 'The title field is required.',
             'content.required' => 'The content field is required.',
-            'author.required' => 'The author field is required.',
         ];
     }
 

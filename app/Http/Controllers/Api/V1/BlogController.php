@@ -7,18 +7,18 @@ use Illuminate\Http\Request;
 use App\Models\Blog;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Traits\HasJsonResponse;
+use App\Http\Requests\CreateBlogRequest;
 class BlogController extends Controller
 {
     use HasJsonResponse;
-    
+
     public function index()
     {
        $blogs = Blog::all();
        return $this->jsonResponse(true, 200, "Blog fetched successfully", ['blogs' => $blogs], false, false);
-
     }
 
-    public function store(Request $request)
+    public function store(CreateBlogRequest $request)
     {
         try{
             $data['title']      = $request['title'];
@@ -53,12 +53,9 @@ class BlogController extends Controller
         //
     }
 
-    public function update(Request $request, string $id)
+    public function update(CreateBlogRequest $request, string $id)
     {
         try{
-
-
-
 
             $blog = Blog::with('user')->where('id',$id)->first();
 
