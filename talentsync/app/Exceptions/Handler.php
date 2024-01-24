@@ -12,8 +12,7 @@ use Symfony\Component\Routing\Exception\UnauthorizedHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-
-
+use Illuminate\Auth\Access\AuthorizationException;
 
 class Handler extends ExceptionHandler
 {
@@ -60,6 +59,8 @@ class Handler extends ExceptionHandler
             ], $exception->getStatusCode());
         }
 
+
+
         if ($exception instanceof \BadMethodCallException) {
             return response()->json( [
                 'success' => 0,
@@ -76,8 +77,46 @@ class Handler extends ExceptionHandler
             ], 404 );
         }
 
+        if ($exception instanceof TokenExpiredException) {
+            return response()->json( [
+                'error' => 'Unauthenticated',
+                'message' => 'Please login to be authenticated',
+                'status' => '401',
+            ], 401 );
+        }
+
+        if ($exception instanceof JWTException) {
+            return response()->json( [
+                'error' => 'Unauthenticated',
+                'message' => 'Please login to be authenticated',
+                'status' => '401',
+            ], 401 );
+        }
+
+
+        if ($exception instanceof TokenInvalidException) {
+            return response()->json( [
+                'error' => 'Unauthenticated',
+                'message' => 'Please login to be authenticated',
+                'status' => '401',
+            ], 401 );
+        }
+
 
         return parent::render($request, $exception);
+
+    }
+
+    protected function unauthorized($request, AuthorizationException $exception)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'error' => 'Unauthorized',
+                'message' => $exception->getMessage(),
+            ], 403);
+        }
+
+        return redirect()->guest($exception->redirectTo() ?? route('login'));
     }
 
 

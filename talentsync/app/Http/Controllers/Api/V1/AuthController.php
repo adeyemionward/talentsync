@@ -9,103 +9,66 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Traits\HasJsonResponse;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\LoginRequest;
 
 
 class AuthController extends Controller
 {
-    protected $user;
-   protected $result;
-    public function __construct()
+
+    use HasJsonResponse;
+
+    public function register(RegisterRequest $request)
     {
-        $this->result = (object)array(
-            'status' => false,
-            'status_code' => 200,
-            'message' => null,
-            'data' => (object) null,
-            'token' => null,
-            'debug' => null
-        );
-    }
-
-    public function register(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'email' => 'required|string|email|max:255|unique:users|unique:users',
-            'password' => 'required|string|min:6',
-
-        ]);
-
-        if ($validator->fails()) {
-            $this->result->status = false;
-            $this->result->message = "Sorry a Validation Error Occured";
-            $this->result->data->errors = $validator->errors()->all();
-            $this->result->status_code = 422;
-            return response()->json($this->result, 422);
-        }
-
-            $data['name'] = $request['name'];
-            $data['email'] = $request['email'];
-            $data['password'] = Hash::make($request['password']);
+        try{
+            $data['name']           = $request['name'];
+            $data['email']          = $request['email'];
+            $data['password']       = Hash::make($request['password']);
             $data['remember_token'] = Str::random(10);
 
             $user = User::create($data);
 
-
             if (!$user) {
-                $this->result->status = false;
-                $this->result->message = "Sorry we could not create account at this time. Try again later";
-                $this->result->data->error = ['errors' => ['']];
-                $this->result->status_code = 500;
-                return response()->json($this->result);
+                return $this->jsonResponse(false, 500, "Sorry we could not create account at this time. Try again later", ['errors' => ['']], false, false);
             }
+            return $this->jsonResponse(true, 200, "User account created successfully", ['users' => $user], false, false);
 
-            $this->result->status = true;
-            $this->result->message = "User account created successfully.";
-            $this->result->data->user = $user;
-            $this->result->status_code = 200;
-            return response()->json($this->result, 200);
-
+        }catch(\Exception $e){
+            $log =  $e->getMessage();
+            return $this->jsonResponse(false, 500, "Sorry we could not authenticate at this time. Try again later", ['error' => $log], false, false);
+        }
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $credentials = $request->only('email', 'password');
+        try{
+            $credentials = $request->only('email', 'password');
 
-        //valid credential
-        $validator = Validator::make($credentials, [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6|max:50'
-        ]);
-
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
-        }
-
-        // Create token
-        try {
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response_data(false, 400, "Login credentials are invalid.", false, false, false);
+            // Create token
+            try {
+                if (!$token = JWTAuth::attempt($credentials)) {
+                    return this->jsonResponse(false, 400, "Login credentials are invalid.", false, false, false);
+                }
+            } catch (JWTException $e) {
+                // return $credentials;
+                return $this->jsonResponse(false, 500, "Could not create token.", false, false, false);
             }
-        } catch (JWTException $e) {
-            // return $credentials;
-            return response_data(false, 500, "Could not create token.", false, false, false);
+
+            //authenticate the user
+            $this->user = auth()->authenticate($token);
+
+            $email = $request->email;
+
+            $user = User::where('email', $email)->first();
+
+            return $this->jsonResponse(true, 200, "Login successful", ['users' => $user], $token, false);
+
+        }catch(\Exception $e){
+
+            $log =  $e->getMessage();
+            return $this->jsonResponse(false, 500, "Sorry we could not authenticate at this time. Try again later", ['error' => $log], false, false);
+
         }
-
-        // at this point we check if the user has 2fa
-
-        $this->user = auth()->authenticate($token);
-
-        $email = $request->email;
-
-        $user = User::where('email', $email)->first();
-
-        $this->result->status = true;
-        $this->result->message = "Login successful.";
-        $this->result->data->user = $user;
-        $this->result->token = $token;
-        $this->result->status_code = 200;
-        return response()->json($this->result, 200);
     }
 }
