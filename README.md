@@ -3,7 +3,7 @@
 
 ## Introduction
 
-This API project is built Laravel (a PHP framework) and JWT Authentication Library
+This API project is built with Laravel (a PHP framework) and JWT Authentication Library
 
 ## Features
 
