@@ -26,6 +26,6 @@ To get started with this API, please follow these steps:
 
 
 ## API Documentation
-Feel free to explore the [documentation](link-to-docs) for more in-depth information.
+Feel free to explore the [API Documentation](https://documenter.getpostman.com/view/9099254/2s9Yynn55i) for more in-depth information.
 
 Happy coding!
